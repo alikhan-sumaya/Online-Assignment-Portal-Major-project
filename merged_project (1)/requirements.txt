@@ -1,0 +1,10 @@
+Flask
+Flask-Mail
+Flask-SQLAlchemy
+Werkzeug
+python-docx
+PyPDF2
+scikit-learn
+numpy
+scipy
+gunicorn

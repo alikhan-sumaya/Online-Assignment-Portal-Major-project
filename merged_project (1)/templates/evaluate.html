@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Evaluate Submissions</h2>
+    <form method="POST">
+        {% for submission in submissions %}
+        <div style="border:1px solid #ccc; padding:10px; margin-bottom:8px;">
+            <p>Student ID: {{ submission.student_id }}</p>
+            <p>File: <a href="{{ url_for('uploaded_file', filename=submission.file_path.split('/')[-1]) }}" target="_blank">Download</a></p>
+            <p>Similarity: <span id="similarity-{{ submission.id }}">{{ submission.similarity if submission.similarity is not none else 'Not checked' }}</span>%</p>
+            <button type="button" onclick="checkSimilarity({{ submission.id }})">Check Similarity</button>
+            <input type="number" name="marks_{{ submission.id }}" placeholder="Enter Marks" value="{{ submission.marks }}">
+        </div>
+        {% endfor %}
+        <button type="submit">Submit Grades</button>
+    </form>
+</div>
+
+<script>
+function checkSimilarity(submissionId) {
+    const btn = event.currentTarget;
+    btn.disabled = true;
+    fetch('/check_similarity/' + submissionId, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+    }).then(data => {
+        if (data && data.similarity !== undefined) {
+            // Update similarity text for the submission
+            const simElem = document.getElementById('similarity-' + submissionId);
+            if (simElem) {
+                simElem.textContent = data.similarity + '%';
+            } else {
+                // fallback: reload
+                window.location.reload();
+            }
+        } else {
+            window.location.reload();
+        }
+    }).catch(err => {
+        console.error(err);
+        window.location.reload();
+    }).finally(() => { btn.disabled = false; });
+}
+</script>
+
+{% endblock %}

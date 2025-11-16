@@ -1,0 +1,49 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Student Dashboard</h2>
+    <h3>Your Assignments</h3>
+    <ul>
+        {% for assignment in assignments %}
+        <li>
+            <h4>{{ assignment.title }}</h4>
+            <p>{{ assignment.description }}</p>
+            <p><strong>Start:</strong> {{ assignment.start_time }}</p>
+            <p><strong>End:</strong> {{ assignment.end_time }}</p>
+
+            {% if assignment.question_file_path %}
+            <p>
+                <strong>Question File:</strong> 
+                <a href="{{ url_for('uploaded_file', filename=assignment.question_file_path.split('/')[-1]) }}" target="_blank">Download</a>
+            </p>
+            {% endif %}
+           
+            {% if assignment.id in submissions %}
+                <p><strong>Status:</strong> Submitted</p>
+                {% if submissions[assignment.id].file_path %}
+                <p>
+                    <strong>File:</strong> 
+                    <a href="{{ url_for('uploaded_file', filename=submissions[assignment.id].file_path.split('/')[-1]) }}" target="_blank">View</a>
+                </p>
+                {% endif %}
+                <p><strong>Marks:</strong> 
+                    {{ submissions[assignment.id].marks if submissions[assignment.id].marks is not none else "Not Yet Evaluated" }}
+                </p>
+                <form method="POST" action="{{ url_for('delete_submission', submission_id=submissions[assignment.id].id) }}">
+                    <button type="submit">Delete Submission</button>
+                </form>
+                <a href="{{ url_for('reupload', assignment_id=assignment.id) }}">Reupload Assignment</a>
+            {% else %}
+                <p><strong>Status:</strong> Not Submitted</p>
+                <a href="{{ url_for('upload', assignment_id=assignment.id) }}">Upload Assignment</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+
+ 
